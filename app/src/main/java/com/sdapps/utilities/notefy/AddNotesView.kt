@@ -1,8 +1,10 @@
 package com.sdapps.utilities.notefy
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sdapps.utilities.notefy.databinding.ActivityAddNotesViewBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,10 +14,15 @@ import java.util.Date
 import java.util.Locale
 
 
-class AddNotesView : AppCompatActivity(), NewNotesInteractor.View {
+class AddNotesView : Activity(), NewNotesInteractor.View {
 
     private lateinit var binding : ActivityAddNotesViewBinding
     private lateinit var presenter: NewNotesInteractor.Presenter
+
+    private lateinit var title : String
+    private lateinit var content: String
+    private var position: Int? = null
+    private var isUpdateScreen: Boolean? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,26 +33,30 @@ class AddNotesView : AppCompatActivity(), NewNotesInteractor.View {
         presenter.attachView(this,applicationContext)
         var bundle = Bundle()
         bundle = intent.extras!!
-        val position = bundle.getInt("POSITION")
-        val isUpdateScreen = bundle.getBoolean("isUpdateScreen")
+        position = bundle.getInt("POSITION")
+        isUpdateScreen = bundle.getBoolean("isUpdateScreen")
 
-        if(isUpdateScreen)
-                (presenter as NewNotesPresenter).sendData(position)
+        if(isUpdateScreen!!)
+                (presenter as NewNotesPresenter).sendData(position!!)
 
 
         binding.backBtn.setOnClickListener{
-            val title : String = binding.title.text.toString()
-            val content : String = binding.content.text.toString()
-            if(!title.trim().isEmpty() && !content.trim().isEmpty() && !isUpdateScreen){
-                saveNotes(title,content)
-            }else if(!title.trim().isEmpty() && !content.trim().isEmpty() && isUpdateScreen){
-                updateNotes(title,content,position)
-            } else{
-                onBackPressed()
-            }
+           validateAndSave(binding,isUpdateScreen!!)
         }
     }
 
+
+    fun validateAndSave(binding: ActivityAddNotesViewBinding, isUpdateScreen: Boolean){
+        title = binding.title.text.toString()
+        content = binding.content.text.toString()
+        if(!title.trim().isEmpty() && !content.trim().isEmpty() && !isUpdateScreen){
+            saveNotes(title,content)
+        }else if(!title.trim().isEmpty() && !content.trim().isEmpty() && isUpdateScreen){
+            updateNotes(title,content,position!!)
+        } else{
+            onBackPressed()
+        }
+    }
     fun saveNotes(title: String, content: String){
         CoroutineScope(Dispatchers.IO).launch {
             val currentDate: String = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
@@ -68,6 +79,16 @@ class AddNotesView : AppCompatActivity(), NewNotesInteractor.View {
         }
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if(isUpdateScreen!!){
+            CoroutineScope(Dispatchers.IO).launch {
+                validateAndSave(binding,true)
+            }
+
+        }else{
+        }
+    }
     override fun moveBackToScreen() {
         startActivity(Intent(this@AddNotesView, HomeNotesActivity::class.java))
         finish()

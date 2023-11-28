@@ -1,5 +1,6 @@
 package com.sdapps.utilities.notefy
 
+import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Build
@@ -14,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sdapps.utilities.notefy.databinding.ActivityMainBinding
 import com.sdapps.utilities.notefy.db.DbHandler
 
-class HomeNotesActivity : AppCompatActivity(), HomeNotesInteractor.View {
+class HomeNotesActivity : Activity(), HomeNotesInteractor.View {
 
 
     private lateinit var binding : ActivityMainBinding
@@ -36,6 +37,9 @@ class HomeNotesActivity : AppCompatActivity(), HomeNotesInteractor.View {
         }
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+    }
 
     fun switchToAddView(){
         val intent = Intent(this, AddNotesView::class.java)
@@ -45,6 +49,7 @@ class HomeNotesActivity : AppCompatActivity(), HomeNotesInteractor.View {
 
         intent.putExtras(bundle)
         startActivity(intent)
+        finish()
     }
 
     override fun showLoading() {
