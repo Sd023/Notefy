@@ -77,7 +77,6 @@ class HomeNotesPresenter(private val appContext: Context): HomeNotesInteractor.P
         db.exe(sql)
         db.closeDB()
     }
-
     override fun deleteAllNotes() {
         TODO("Not yet implemented")
     }
